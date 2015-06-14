@@ -36,8 +36,6 @@ public class MidiEventGroup {
         this.data1 = data1;
         this.data2 = data2;
         this.duration = duration;
-
-        //System.out.println(tick + " " + data1 + " " + data2);
     }
 
     public ShortMessage createMessage (int command, int channel, int data1, int data2) {
