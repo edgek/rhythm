@@ -8,11 +8,13 @@ import java.awt.event.*;
  * @author Karl Edge
  */
 
-public class Controller extends Observable implements ControllerEventListener, ActionListener {
+public class Controller extends Observable 
+    implements ControllerEventListener, ActionListener 
+{
     private Sequencer sequencer;
     private Sequence sequence;
-    private Vector timelines;
     private float tempo;
+    private int[] controlEvents;
 
     public Controller () {
         try {
@@ -24,13 +26,6 @@ public class Controller extends Observable implements ControllerEventListener, A
             System.exit(1);    
         }
 
-        // Pause for sequencer to start up.
-        try {
-            Thread.sleep(3000);              //1000 milliseconds is one second.
-        } catch(InterruptedException ex) {
-            Thread.currentThread().interrupt();
-        }
-
         try {
             sequence = new Sequence(Sequence.PPQ, 4);
             System.out.println("Sequence created");
@@ -38,29 +33,21 @@ public class Controller extends Observable implements ControllerEventListener, A
             ex.printStackTrace();
             System.exit(1);    
         }
+    }
 
-        timelines = new Vector();
-        
-        // MIDI events with these codes will trigger controlChange()
-        int[] events = {127};
+    public void setControlEvents (int[] events) {
+        controlEvents = events;
         sequencer.addControllerEventListener(this, events);
     }
 
+    // Called when MIDI control event is triggered
     public void controlChange (ShortMessage m) {
         setChanged();
         notifyObservers(m.getData2()); // Sends tick number to observers
     }
 
-    public Timeline addTimeline (int pulseCount, int tickCount, int repeatCount) {
-        Track track = sequence.createTrack();
-        Timeline timeline = new Timeline(track, pulseCount, tickCount, repeatCount);
-        timelines.addElement(timeline);
-        return timeline;
-    }
-    
-    public void deleteTimeline (Timeline t) {
-        sequence.deleteTrack(t.getTrack());
-        timelines.remove(t);
+    public Track createTrack () {
+        return sequence.createTrack();
     }
 
     public void setTempo (Float tempo) {
